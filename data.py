@@ -1,30 +1,12 @@
-from __future__ import print_function
-import numpy as np 
+import numpy as np
 
 import skimage.io as io
 import skimage.transform as trans
 import time
 import tflite_runtime.interpreter as tflite
-from PIL import Image
 
-Sky = [128,128,128]
-Building = [128,0,0]
-Pole = [192,192,128]
-Road = [128,64,128]
-Pavement = [60,40,222]
-Tree = [128,128,0]
-SignSymbol = [192,128,128]
-Fence = [64,64,128]
-Car = [64,0,128]
-Pedestrian = [64,64,0]
-Bicyclist = [0,128,192]
-Unlabelled = [0,0,0]
 
-COLOR_DICT = np.array([Sky, Building, Pole, Road, Pavement,
-                          Tree, SignSymbol, Fence, Car, Pedestrian, Bicyclist, Unlabelled])
-
-        
-def test_image_prep(image_file_path, target_size=(256, 256), flag_multi_class=False, as_gray=True):
+def test_image_prep(image_file_path, target_size=(288, 448), flag_multi_class=False, as_gray=True):
     img = io.imread(image_file_path, as_gray=as_gray)
     img = img / 255
     img = trans.resize(img, target_size)
@@ -46,6 +28,7 @@ def load_model_lite_single_predict(model_path, tf_image):
     input_shape = input_details[0]['shape']
     input_data = np.array(tf_image, dtype=np.float32)
     interpreter.set_tensor(input_details[0]['index'], input_data)
+
     t1 = time.time()
     interpreter.invoke()
     print("elapsed-time =", time.time() - t1)
@@ -55,8 +38,9 @@ def load_model_lite_single_predict(model_path, tf_image):
     outputs = interpreter.get_tensor(output_details[0]['index'])
     
     output = outputs[0]
-    img = output[:,:,0]
-    io.imsave('solar.png', img)
-    return img
+    img_float32 = output[:,:,0]
+    img_float32 = img_float32 * 255
+    img_uint8 = img_float32.astype(np.uint8)
 
-        
+    io.imsave('out.png', img_uint8)
+    return img_uint8
