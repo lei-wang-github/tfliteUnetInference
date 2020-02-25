@@ -5,8 +5,10 @@ import skimage.transform as trans
 import time
 import tflite_runtime.interpreter as tflite
 
+img_height = 512
+img_width = 512
 
-def test_image_prep(image_file_path, target_size=(288, 448), flag_multi_class=False, as_gray=True):
+def test_image_prep(image_file_path, target_size=(img_height, img_width), flag_multi_class=False, as_gray=True):
     img = io.imread(image_file_path, as_gray=as_gray)
     img = img / 255
     img = trans.resize(img, target_size)
